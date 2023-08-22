@@ -1,4 +1,5 @@
 #include "geocomp.hpp"
+#include <ostream>
 
 // Initilization list
 Point::Point(): x(0), y(0){}
@@ -33,12 +34,25 @@ bool operator == (Point a, Point b)
   return true;
 }
 
-
-std::ostream& operator << (std::ostream& os, Point pt)
+std::ostream& operator << (std::ostream& os, const Point& pt)
 {
   os << "(" << pt.x << "," << pt.y << ")";
   return os;
 }
+
+std::ostream& operator << (std::ostream& os, const PolyCh& pc)
+{
+  os << pc[0];
+  for(unsigned i = 1; i < pc.size(); i+=1)
+  {
+    os << "--" << pc[i];
+  }
+  return os;
+}
+
+
+
+
 
 bool operator != (Point a, Point b)
 {
@@ -95,7 +109,7 @@ bool is_monotone(PolyCh pc, Line ln)
     // (a > b > c) 
     if (a < b && b < c) continue;
     if( a > b && b > c) continue;
-    // continue end the current for loop iteration
+    // continue stops the current for loop iteration
     // Case 2: (a = b < c) || (a < b = c) 
     //         (a = b > c) || (a > b = c)
     if((a == b && b < c) || (a < b && b == c)) continue;
@@ -104,3 +118,10 @@ bool is_monotone(PolyCh pc, Line ln)
   }
   return true;
 }
+int area2( Point a, Point b, Point c)
+{
+  Vector v = b - a;
+  Vector w = c - a;
+  return (v.x*w.y - v.y*w.x);
+}
+

@@ -1,8 +1,6 @@
 #include <iostream>
 #include "geocomp.hpp"
-
 using namespace std;
-
 int main()
 {
   PolyCh case1; //a<b<c
@@ -74,7 +72,27 @@ int main()
   else{cout << "NOT MONOTONE!" << endl;} 
 
 
+//Clase 2. Area de un triangulo
+//Anti clock wise = Positive Area
+  Point a(1,1);
+  Point c(3,2);
+  Point b(2,3);
 
 
-  return 0;
+
+
+  int a2 = area2(a,b,c);
+  cout << "2A = " << a2 << endl;
+
+  PolyCh pc;
+  pc.push_back(a);
+   pc.push_back(b);
+ pc.push_back(c);
+
+  cout << "chain = " << pc << endl;
+
+
+return 0;
 }
+
+
