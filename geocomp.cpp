@@ -125,3 +125,68 @@ int area2( Point a, Point b, Point c)
   return (v.x*w.y - v.y*w.x);
 }
 
+// Relative position
+bool is_right(Segment ls, Point pt)
+{
+  //  if (area2(ls.a, ls.b, pt) < 0) return true;
+  //  return false;
+  return (area2(ls.a, ls.b, pt) < 0);
+}
+bool is_left(Segment ls, Point pt)
+{
+  return (area2(ls.a, ls.b, pt) > 0);
+}
+
+bool is_righton(Segment ls, Point pt)
+{
+  return (area2(ls.a, ls.b, pt) <= 0);
+}
+bool is_lefton(Segment ls, Point pt)
+{
+  return (area2(ls.a, ls.b, pt) >=0);
+}
+
+// Colinear for avoid unprecision
+bool is_colinear(Segment ls, Point pt)
+{
+  return (area2(ls.a, ls.b, pt) == 0);
+}
+bool is_on_edge(Segment ls, Point pt)
+{
+  int& ax = ls.a.x;
+  int& bx = ls.b.x;
+  int& cx = pt.x;
+
+  int& ay = ls.a.y;
+  int& by = ls.b.y;
+  int& cy = pt.y;
+
+  //  if (!((ax < cx && cx < bx) || (ax > cx && cx > bx))) return false;
+  //if (!((ay < cy && cy < by) || (ay > cy && cy > bx))) return false;
+
+  // Existiendo colinealidad
+  if (area2(ls.a, ls.b, pt) != 0) return false;
+
+  // Checking if c is between a and b
+  if((ax < cx) && (cx < bx)) return true;
+  if((ay < cy) && (cy < by)) return true;
+  if((ax > cx) && (cx > bx)) return true;
+  if((ax > cy) && (cx > by)) return true;
+  return false;
+}
+
+bool is_on_edge(Point a, Point b, Point c) 
+{
+
+  // Existiendo colinealidad
+  if (area2(a, b, c) != 0) return false;
+
+  // Checking if c is between a and b
+  if((a.x < c.x) && (c.x < b.x)) return true;
+  if((a.y < c.y) && (c.y < b.y)) return true;
+  if((a.x > c.x) && (c.x > b.x)) return true;
+  if((a.x > c.y) && (c.x > b.y)) return true;
+  return false;
+}
+
+

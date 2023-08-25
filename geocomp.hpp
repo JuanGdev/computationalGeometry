@@ -42,4 +42,15 @@ int dot( Vector a, Vector b);
 bool is_monotone(PolyCh pc, Line ln);
 
 int area2( Point a, Point b, Point c);
+
+// Relative position
+bool is_right(Segment ls, Point pt);
+bool is_left(Segment ls, Point pt);
+
+bool is_righton(Segment ls, Point pt);
+bool is_lefton(Segment ls, Point pt);
+
+bool is_colinear(Segment ls, Point pt);
+bool is_on_edge(Segment ls, Point pt);
+
 #endif
