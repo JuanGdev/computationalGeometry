@@ -419,4 +419,34 @@ Point inter_pt( Point a, Point b, Point c, Point d ) {
    y = m1*x + k1;
    return Point((int)x,(int)y);
 }
+void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y ){
+   double m1, m2, k1, k2;
 
+   // Caso: (a,b) vertical 
+   if (a.x == b.x ){
+      x = a.x;
+      m2 = (double)(d.y - c.y) / (d.x - c.x);
+      k2 = c.y - m2*c.x;
+
+      y = m2*x + k2; 
+      return; 
+   }
+   // Caso: (c,d) vertical
+   if ( c.x == d.x ){
+      x = c.x;
+      m1 = (double)(b.y - a.y) / (b.x - a.x);
+      k1 = a.y - m1*a.x;
+
+      y = m1*x + k1;
+      return; 
+   }
+
+   // Caso: General
+   m1 = (double)(b.y - a.y) / (b.x - a.x);
+   m2 = (double)(d.y - c.y) / (d.x - c.x);
+   k1 = a.y - m1*a.x;
+   k2 = c.y - m2*c.x;
+
+   x = (k2 - k1)/(m1 - m2);
+   y = m1*x + k1;
+}

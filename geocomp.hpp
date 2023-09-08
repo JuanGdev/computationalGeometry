@@ -82,6 +82,6 @@ bool is_properint( Point a, Point b, Point c, Point d );
 bool is_improperint( Point a, Point b, Point c, Point d );
 bool is_inter( Point a, Point b, Point c, Point d );
 Point inter_pt( Point a, Point b, Point c, Point d );
-
+void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y );
 #endif
 
