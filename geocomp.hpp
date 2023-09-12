@@ -9,10 +9,10 @@
 #include <algorithm>
 
 struct Point {
-   Point();
-   Point( int x, int y );
-   int x;
-   int y;
+  Point();
+  Point( int x, int y );
+  int x;
+  int y;
 };
 
 Point operator+( Point a, Point b );
@@ -30,11 +30,11 @@ typedef Point Vertex;
 typedef Point Vector;
 
 struct Segment {
-   Segment();
-   Segment( Point a, Point b );
-   Segment( int x0, int y0, int x1, int y1 );
-   Point a;
-   Point b;
+  Segment();
+  Segment( Point a, Point b );
+  Segment( int x0, int y0, int x1, int y1 );
+  Point a;
+  Point b;
 };
 
 typedef Segment Line;
@@ -44,6 +44,26 @@ typedef std::vector<Vertex> PolyCh;
 std::ostream& operator<<( std::ostream& os, const PolyCh& pc );
 
 typedef std::vector<Point> PointSet;
+
+class Polygon{
+public:
+  Polygon();
+
+  void push(Vertex vertex);
+
+
+private:
+  std::vector<Vertex> m_vertices;
+
+  //Circular index
+  // n = no. de puntos en el arreglo
+  // i = indice del elemento en el rango [INTMIN..INTMAX]
+  //unsigned cind(unsigned n, int i); // Es global temporalmente
+};
+
+unsigned cind(unsigned n, int i); // Es global temporalmente
+
+// ==============================
 
 // Producto escalar
 int dot( Vector a, Vector b);
@@ -67,8 +87,8 @@ bool is_onedge( Point a, Point b, Point c );
 
 bool is_genpos( const PointSet& set );
 PointSet generator_genpos(unsigned, int, int, int, int);
-      //unsiged N, int x0, int x1, int y0, int y1
-      //);
+//unsiged N, int x0, int x1, int y0, int y1
+//);
 
 // Geometría de Triángulos
 Point centroid( Point a, Point b, Point c );

@@ -115,7 +115,7 @@ TEST_CASE("proper intersection")
     Point d (1,8);
     CHECK_FALSE(is_properint(a,b,c,d));
   }
- SUBCASE("segmentos se intersectan")
+  SUBCASE("segmentos se intersectan")
   {
     Point a(1,2);
     Point b(7,5);
@@ -133,4 +133,50 @@ TEST_CASE("Punto de intersección")
   Point e = inter_pt(a,b,c,d);
   CHECK(e.x == 5);
   CHECK(e.y == 4);
+}
+
+TEST_CASE("índice arreglo circular")
+{
+  SUBCASE("nominal")
+  {
+    CHECK( cind(5,0) == 0);
+    CHECK( cind(5,1) == 1);
+    CHECK( cind(5,2) == 2);
+    CHECK( cind(5,3) == 3);
+    CHECK( cind(5,4) == 4);
+  }
+
+  SUBCASE("Mayor o igual a n")
+  {
+    CHECK( cind(5,5) == 0);
+    CHECK( cind(5,6) == 1);
+    CHECK( cind(5,7) == 2);
+    CHECK( cind(5,8) == 3);
+    CHECK( cind(5,9) == 4);
+  }
+
+  SUBCASE("Mayor o igual a 2n")
+  {
+    CHECK( cind(5,10) == 0);
+    CHECK( cind(5,11) == 1);
+    CHECK( cind(5,12) == 2);
+    CHECK( cind(5,13) == 3);
+    CHECK( cind(5,14) == 4);
+  }
+  SUBCASE("Menor que 0 y mayor o igual a -n")
+  {
+    CHECK( cind(5,-1) == 4);
+    CHECK( cind(5,-2) == 3);
+    CHECK( cind(5,-3) == 2);
+    CHECK( cind(5,-4) == 1);
+    CHECK( cind(5,-5) == 0);
+  }
+  SUBCASE("Menor que -n")
+  {
+    CHECK( cind(5,-6) == 4);
+    CHECK( cind(5,-7) == 3);
+    CHECK( cind(5,-8) == 2);
+    CHECK( cind(5,-9) == 1);
+    CHECK( cind(5,-10) == 0);
+  }
 }
