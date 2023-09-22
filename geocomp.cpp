@@ -579,3 +579,34 @@ bool is_convex(const Polygon& poly)
   }
   return true;
 }
+
+// Determina si el rayo horizontal (-int,c) se intersecta const
+// el segmento a-b
+bool is_rayinter(Point a, Point b, Point c)
+{
+  // Caso 1.
+  if(a.y < c.y && c.y < b.y)
+  {
+    if(area2(a,b,c) <= 0) return true;
+    return false;
+  }
+  // Caso 2 
+  if(b.y < c.y && c.y < a.y)
+  {
+    if(area2(a,b,c) >= 0) return true;
+    return false;
+  }
+  return false;
+}
+
+bool is_inside_noconvex(const Polygon& poly, Point pt)
+{
+  int cnt = 0; //cuenta de intersecciones 
+  for(unsigned i = 0; i < poly.size(); i +=1)
+  {
+    if(is_rayinter(poly[i], poly[i+1], pt)) cnt +=1;
+    if(poly[i].y == pt.y && poly[i].x <= pt.x) cnt += 1;
+  }
+  if(cnt & 1) return true;
+  return false;
+  }

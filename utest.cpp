@@ -298,20 +298,20 @@ TEST_CASE("Convex polygon")
     Vertex d(4,0);
     Vertex e(4,4);
 
-    Polygon polyy;
-    polyy.push(a);
-    polyy.push(b);
-    polyy.push(c);
-    polyy.push(d);
-    polyy.push(e);
-    CHECK(is_convex(polyy)==true);
-  }
-  SUBCASE("Not convex")
-  {
-    Vertex a(3,5);
-    Vertex b(2,4);
-    Vertex c(2,0);
-    Vertex d(4,0);
+      Polygon polyy;
+      polyy.push(a);
+      polyy.push(b);
+      polyy.push(c);
+      polyy.push(d);
+      polyy.push(e);
+      CHECK(is_convex(polyy)==true);
+    }
+    SUBCASE("Not convex")
+    {
+      Vertex a(3,5);
+      Vertex b(2,4);
+      Vertex c(2,0);
+      Vertex d(4,0);
     Vertex e(3,3);
     Vertex f(4,4);
     Polygon polyy;
