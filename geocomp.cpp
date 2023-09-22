@@ -1,5 +1,10 @@
 #include "geocomp.hpp"
 
+
+//-----------------------------------------------------------------------------
+// Point
+//-----------------------------------------------------------------------------
+
 Point::Point(): x(0), y(0) { }
 
 Point::Point( int x, int y ): x(x), y(y) { }
@@ -45,6 +50,20 @@ std::ostream& operator<<( std::ostream& os, Point pt ) {
   return os;
 }
 
+//-----------------------------------------------------------------------------
+// Segment
+//-----------------------------------------------------------------------------
+
+Segment::Segment() { }
+
+Segment::Segment( Point a, Point b ): a(a.x,a.y), b(b.x,b.y) { }
+
+Segment::Segment( int x0, int y0, int x1, int y1 ): a(x0,y0), b(x1,y1) { }
+
+//-----------------------------------------------------------------------------
+// Polygonal chain
+//-----------------------------------------------------------------------------
+
 std::ostream& operator<<( std::ostream& os, const PolyCh& pc ) {
   os << pc[0];
   for ( unsigned i=1; i<pc.size(); i+=1 ) {
@@ -53,25 +72,82 @@ std::ostream& operator<<( std::ostream& os, const PolyCh& pc ) {
   return os;
 }
 
-Segment::Segment() { }
+//-----------------------------------------------------------------------------
+// Circular array
+//-----------------------------------------------------------------------------
 
-Segment::Segment( Point a, Point b ): a(a.x,a.y), b(b.x,b.y) { }
+CircIndex::CircIndex(): n(1), dn(1), sn(-1) { }
 
-Segment::Segment( int x0, int y0, int x1, int y1 ): a(x0,y0), b(x1,y1) { }
+CircIndex::CircIndex( unsigned size ): n(size), dn(size<<1), sn(-size) { }
+
+void CircIndex::set( unsigned size ) {
+  n = (int)size;
+  dn = n << 1;
+  sn = -n;
+}
+
+int CircIndex::operator()( int i ) const {
+  if ( i >= 0 ) {
+    if ( i < n ) return i;
+    if ( i < dn ) return i - n;
+    return i % n;
+  }
+  if ( i >= sn ) return n + i;
+  return (i + 1) % n + (n - 1);
+}
+
+unsigned cindex( unsigned n, int i ) {
+  int m = (int)n;
+
+  if ( i >= 0 ) {
+    if ( i < m ) return i;
+    if ( i < (m<<1) ) return i - m;
+    return i % m;
+  }
+  if ( i >= -m ) return m + i;
+  return (i + 1) % m + (m - 1);
+}
+
+//-----------------------------------------------------------------------------
+// Polygon
+//-----------------------------------------------------------------------------
+
+Polygon::Polygon() { }
+
+unsigned Polygon::size() const {
+  return m_vertices.size();
+}
+
+void Polygon::push( Vertex vertex ) {
+  m_vertices.push_back(vertex);
+  cind.set( size() );
+}
+
+const Vertex& Polygon::operator[]( int index ) const {
+  return m_vertices[cind(index)];
+}
+
+Vertex& Polygon::operator[]( int index ) {
+  return m_vertices[cind(index)];
+}
+
+//-----------------------------------------------------------------------------
+// Functions
+//-----------------------------------------------------------------------------
 
 int dot( Vector a, Vector b) {
   return a.x*b.x + a.y*b.y;
 }
-int distsqr(Point a, Point b)
-{
+
+int distsqr( Point a, Point b ) {
   return (b.x-a.x)*(b.x-a.x) + (b.y-a.y)*(b.y-a.y);
 }
-int dist(Point a, Point b)
-{
+
+int dist( Point a, Point b ) {
   return (int)std::sqrt(distsqr(a,b));
 }
 
-double fdist(Point a, Point b){
+double fdist( Point a, Point b ) {
   return std::sqrt(distsqr(a,b));
 }
 
@@ -177,9 +253,7 @@ bool is_genpos( const PointSet& set ) {
 // x1 = mayor valor componente en x
 // y0 = menor valor componente en y
 // y1 = mayor valor componente en y
-PointSet generator_genpos(
-  unsigned N, int x0, int x1, int y0, int y1
-) {
+PointSet generator_genpos( unsigned N, int x0, int x1, int y0, int y1 ) {
   PointSet set;
   Point pt;
 
@@ -203,6 +277,7 @@ PointSet generator_genpos(
   } while ( pt == set[0] );
   set.push_back(pt);
   if ( N == 2 ) return set;
+
   while ( set.size() < N ) {
     pt.x = distx(generator);
     pt.y = disty(generator);
@@ -222,37 +297,9 @@ PointSet generator_genpos(
     set.push_back(pt);
   gen_pt_again:;
   }
+
   return set;
 }
-
-// Bloque 'while' de generator_genpos() usando banderas para salir de los ciclos
-// anidados. El código extra que es necesario hace el bloque más confuso y
-// difícil de leer. Este es uno de los pocos casos en que usar 'goto' está
-// justificado.
-//
-// while ( set.size() < N ) {
-//
-//    pt.x = distx(generator);
-//    pt.y = disty(generator);
-//
-//    bool flag = true;
-//    for ( unsigned i=0; i<set.size()-1; i+=1 ) {
-//       if ( flag == false ) break
-//       for ( unsigned j=i+1; j<set.size(); j+=1 ) {
-//          if ( is_colinear(set[i],set[j],pt)  {
-//                flag = false;
-//                break;
-//          }
-//       }
-//    }
-//
-//    if ( flag == false ) continue;
-//
-//    // verificar si el punto pasa la prueba
-//
-//    set.push_back(pt);
-//
-// }
 
 Point centroid( Point a, Point b, Point c ) {
   return ((a + b + c)/3);
@@ -260,22 +307,6 @@ Point centroid( Point a, Point b, Point c ) {
 
 Point middlept( Point a, Point b ) {
   return ((a + b)/2);
-}
-
-Point circ_center ( Point a, Point b, Point c ) {
-  Point B = b - a;
-  Point C = c - a;
-  Point O;
-
-  Point B2 = B * B;
-  Point C2 = C * C;
-
-  O.x = C.y*(B2.x + B2.y) - B.y*(C2.x + C2.y);
-  O.y = B.x*(C2.x + C2.y) - C.x*(B2.x + B2.y) ;
-  int D = 2*(B.x*C.y - B.y*C.x);
-
-  //return Point( O.x/D + a.x, O.y/D + a.y );
-  return O/D + a;
 }
 
 void ccirc ( Point a, Point b, Point c, Point& o, int& r ) {
@@ -290,17 +321,52 @@ void ccirc ( Point a, Point b, Point c, Point& o, int& r ) {
   O.y = B.x*(C2.x + C2.y) - C.x*(B2.x + B2.y) ;
   int D = 2*(B.x*C.y - B.y*C.x);
 
-  //return Point( O.x/D + a.x, O.y/D + a.y );
   o = O/D + a;
   r = (int)std::sqrt(O.x*O.x + O.y*O.y);
 }
 
-double circ_radius ( Point o, Point v ) {
-  return dist(o,v);
+void centroid( Point a, Point b, Point c, double& x, double& y ) {
+  x = (a.x + b.x + c.x)*(1.0/3.0);
+  y = (a.y + b.y + c.y)*(1.0/3.0);
 }
 
-// double angle( Point a, Point b, Point c );
+void middlept( Point a, Point b, double& x, double& y ) {
+  x = 0.5*(a.x + b.x);
+  y = 0.5*(a.y + b.y);
+}
 
+void ccirc ( Point a, Point b, Point c, double& x, double& y, double& r ) {
+  Point B = b - a;
+  Point C = c - a;
+
+  Point B2 = B * B;
+  Point C2 = C * C;
+
+  double Ox = C.y*(B2.x + B2.y) - B.y*(C2.x + C2.y);
+  double Oy = B.x*(C2.x + C2.y) - C.x*(B2.x + B2.y) ;
+  double D = 2*(B.x*C.y - B.y*C.x);
+
+  x = Ox/D + a.x;
+  y = Oy/D + a.y;
+  r = std::sqrt(Ox*Ox + Oy*Oy);
+}
+
+//Point circcenter ( Point a, Point b, Point c ) {
+//   Point B = b - a;
+//   Point C = c - a;
+//   Point O;
+//
+//   Point B2 = B * B;
+//   Point C2 = C * C;
+//
+//   O.x = C.y*(B2.x + B2.y) - B.y*(C2.x + C2.y);
+//   O.y = B.x*(C2.x + C2.y) - C.x*(B2.x + B2.y) ;
+//   int D = 2*(B.x*C.y - B.y*C.x);
+//
+//   return O/D + a;
+//}
+
+// double angle( Point a, Point b, Point c );
 
 bool is_properint( Point a, Point b, Point c, Point d ) {
   if ( is_right(a,b,c) && is_right(a,b,d) ) return false;
@@ -309,18 +375,6 @@ bool is_properint( Point a, Point b, Point c, Point d ) {
   if ( is_left(c,d,a)  && is_left(c,d,b)  ) return false;
   return true;
 }
-
-//bool is_properint( Point a, Point b, Point c, Point d ) {
-//
-//   if ( ( (is_right(a,b,c) && is_left(a,b,d)) || \
-//          (is_left(a,b,c) && is_right(a,b,d)) ) && \
-//      (   (is_right(c,d,a) && is_left(c,d,b)) || \
-//          (is_left(c,d,a) && is_right(c,d,b)) ) ) {
-//      return true;
-//   }
-//   return false;
-//}
-
 
 bool is_improperint( Point a, Point b, Point c, Point d ) {
   if ( is_onedge(a,b,c) ) return true;
@@ -387,7 +441,6 @@ bool is_inter( Point a, Point b, Point c, Point d ) {
   return false;
 }
 
-// WARNING: Primero usar las funciones de intersección
 Point inter_pt( Point a, Point b, Point c, Point d ) {
   double x, y, m1, m2, k1, k2;
 
@@ -419,48 +472,110 @@ Point inter_pt( Point a, Point b, Point c, Point d ) {
   y = m1*x + k1;
   return Point((int)x,(int)y);
 }
-void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y ){
+
+// WARNING: Primero usar las funciones de intersección
+void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y ) {
   double m1, m2, k1, k2;
 
-  // Caso: (a,b) vertical 
-  if (a.x == b.x ){
+  // Caso: (a,b) vertical
+  if ( a.x == b.x ) {
     x = a.x;
-    m2 = (double)(d.y - c.y) / (d.x - c.x);
+    m2 = (double)(d.y - c.y)/(d.x - c.x);
     k2 = c.y - m2*c.x;
-
-    y = m2*x + k2; 
-    return; 
+    y = m2*x + k2;
+    return;
   }
+
   // Caso: (c,d) vertical
-  if ( c.x == d.x ){
+  if ( c.x == d.x ) {
     x = c.x;
-    m1 = (double)(b.y - a.y) / (b.x - a.x);
+    m1 = (double)(b.y - a.y)/(b.x - a.x);
     k1 = a.y - m1*a.x;
-
     y = m1*x + k1;
-    return; 
+    return;
   }
 
-  // Caso: General
-  m1 = (double)(b.y - a.y) / (b.x - a.x);
-  m2 = (double)(d.y - c.y) / (d.x - c.x);
+  // Caso General
+  m1 = (double)(b.y - a.y)/(b.x - a.x);
+  m2 = (double)(d.y - c.y)/(d.x - c.x);
   k1 = a.y - m1*a.x;
   k2 = c.y - m2*c.x;
 
   x = (k2 - k1)/(m1 - m2);
   y = m1*x + k1;
+  return;
 }
 
-unsigned cind(unsigned n, int i)
-{
-  if(i >=0) 
-  {
-    if(i<(int)n) return i;
-    if(i< ((int)n <<1)) return i - (int)n;
-    return i%(int)n;
+// Polygon
+
+bool is_inside_convex( const Polygon& poly, Point pt ) {
+
+  for ( unsigned i=0; i<poly.size(); i+=1 ) {
+    if ( !is_left(poly[i],poly[i+1],pt) ) return false;
   }
-  if(i >= -(int)n) return n + i;
-  return ((i+1)%(int)n) + (int)n-1;
+  return true;
 }
 
+bool is_insideon_convex( const Polygon& poly, Point pt ) {
 
+  for ( unsigned i=0; i<poly.size(); i+=1 ) {
+    if ( !is_lefton(poly[i],poly[i+1],pt) ) return false;
+  }
+  return true;
+}
+
+bool is_properint( const Polygon& poly, const Segment& seg ) {
+  for ( unsigned i=0; i<poly.size(); i+=1 ) {
+    if ( is_properint(poly[i],poly[i+1],seg.a,seg.b) ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+int is_propercnt( const Polygon& poly, const Segment& seg ) {
+  int cnt = 0;
+
+  for ( unsigned i=0; i<poly.size(); i+=1 ) {
+    if ( is_properint(poly[i],poly[i+1],seg.a,seg.b) ) {
+      cnt += 1;
+    }
+  }
+  return cnt;
+}
+
+bool is_simple( const Polygon& poly ) {
+
+  for ( unsigned i=0; i<poly.size()-1; i+=1 ) {
+    for ( unsigned j=i+1; j<poly.size(); j+=1 ) {
+      if ( is_properint(poly[i],poly[i+1],poly[j],poly[j+1]) ) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool is_autoint( const Polygon& poly ) {
+  return !is_simple(poly);
+}
+
+bool is_convex(const Polygon& poly)
+{
+  int totalVertex = poly.size();
+  int vertexA = 0, vertexB = 1, vertexC = 2;
+  //Poly for at least 3 vertex
+  if(totalVertex < 3) return false;
+
+  for(int i = 3; i <= totalVertex; i+=1)
+  { 
+    if(!is_left(poly[vertexA], poly[vertexB], poly[vertexC]))
+    {
+      return false;
+    }
+    vertexA +=1;
+    vertexB += 1;
+    vertexC = i;
+  }
+  return true;
+}
