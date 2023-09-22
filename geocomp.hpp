@@ -151,5 +151,8 @@ bool is_autoint( const Polygon& poly );
 
 //Tarea
 bool is_convex(const Polygon& poly);
+bool is_inside_noconvex(const Polygon& poly, Point pt);
+=======
+
 #endif
 
