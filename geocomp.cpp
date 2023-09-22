@@ -580,6 +580,7 @@ bool is_convex(const Polygon& poly)
   return true;
 }
 
+
 // Determina si el rayo horizontal (-int,c) se intersecta const
 // el segmento a-b
 bool is_rayinter(Point a, Point b, Point c)
