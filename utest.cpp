@@ -140,6 +140,28 @@ TEST_CASE( "general position point set generator" ) {
   CHECK( is_genpos(set) );
 }
 
+TEST_CASE("ángulos internos de triángulos")
+{
+  SUBCASE("Ángulo regular"){
+    Vertex a(1,2);
+    Vertex b(5,4);
+    Vertex c(2,5);
+    CHECK(angle(a,b,c)== doctest::Approx(0.7853981633974));
+    CHECK(angle(b,c,a)== doctest::Approx(0.7853981633974));
+    CHECK(angle(c,a,b)== doctest::Approx(1.5707963267949));
+  }
+  SUBCASE("Ángulo de 180")
+  {
+    Vertex a(1,2);
+    Vertex b(5,4);
+    Vertex c(3,3);
+    CHECK(angle(a,b,c) == doctest::Approx(0.0));
+    CHECK(angle(b,c,a) == doctest::Approx(0.0));
+    CHECK(angle(c,a,b) == doctest::Approx(3.1415926535));
+
+  }
+}
+
 TEST_CASE( "proper intersection" ) {
   SUBCASE( "segmento cd a la derecha de ab" ) {
     Point a(2,1);
@@ -292,36 +314,36 @@ TEST_CASE("Convex polygon")
 {
   SUBCASE("Is convex")
   {
-      Polygon polyy;
-      polyy.push(Vertex(1,1));
-      polyy.push(Vertex(4,0));
-      polyy.push(Vertex(7,2));
-      polyy.push(Vertex(6,5));
-      polyy.push(Vertex(3,6));
-      polyy.push(Vertex(1,4));
-      CHECK(is_convex(polyy)==true);
-    }
-    SUBCASE("Not convex")
-    {
-   Polygon polyy;
-      polyy.push(Vertex(1,1));
-      polyy.push(Vertex(4,0));
-      polyy.push(Vertex(7,2));
-      polyy.push(Vertex(4,3));
-      polyy.push(Vertex(3,6));
-      polyy.push(Vertex(1,4));
-   CHECK_FALSE(is_convex(polyy));
+    Polygon polyy;
+    polyy.push(Vertex(1,1));
+    polyy.push(Vertex(4,0));
+    polyy.push(Vertex(7,2));
+    polyy.push(Vertex(6,5));
+    polyy.push(Vertex(3,6));
+    polyy.push(Vertex(1,4));
+    CHECK(is_convex(polyy)==true);
+  }
+  SUBCASE("Not convex")
+  {
+    Polygon polyy;
+    polyy.push(Vertex(1,1));
+    polyy.push(Vertex(4,0));
+    polyy.push(Vertex(7,2));
+    polyy.push(Vertex(4,3));
+    polyy.push(Vertex(3,6));
+    polyy.push(Vertex(1,4));
+    CHECK_FALSE(is_convex(polyy));
   }
 
-    SUBCASE("Area")
-    {
-   Polygon polyy;
-      polyy.push(Vertex(1,1));
-      polyy.push(Vertex(4,0));
-      polyy.push(Vertex(7,2));
-      polyy.push(Vertex(6,5));
-      polyy.push(Vertex(3,6));
-      polyy.push(Vertex(1,4));
-      CHECK(area(polyy) == doctest::Approx(25.5));
+  SUBCASE("Area")
+  {
+    Polygon polyy;
+    polyy.push(Vertex(1,1));
+    polyy.push(Vertex(4,0));
+    polyy.push(Vertex(7,2));
+    polyy.push(Vertex(6,5));
+    polyy.push(Vertex(3,6));
+    polyy.push(Vertex(1,4));
+    CHECK(area(polyy) == doctest::Approx(25.5));
   }
 }

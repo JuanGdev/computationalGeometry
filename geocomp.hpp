@@ -104,6 +104,7 @@ int dot( Vector a, Vector b);
 int distsqr( Point a, Point b );
 int dist( Point a, Point b );
 double fdist( Point a, Point b );
+double mag(Vector v);
 
 // Monotonía, cadenas poligonales
 bool is_monotone( PolyCh pc, Line ln );

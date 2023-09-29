@@ -1,4 +1,5 @@
 #include "geocomp.hpp"
+#include <cmath>
 
 
 //-----------------------------------------------------------------------------
@@ -150,6 +151,12 @@ int dist( Point a, Point b ) {
 double fdist( Point a, Point b ) {
   return std::sqrt(distsqr(a,b));
 }
+
+double mag(Vector v)
+{
+  return std::sqrt(v.x*v.x+v.y*v.y);
+}
+
 
 // Caso 1: ( a < b < c )
 //         ( a > b > c )
@@ -371,7 +378,12 @@ void ccirc ( Point a, Point b, Point c, double& x, double& y, double& r ) {
 //   return O/D + a;
 //}
 
-// double angle( Point a, Point b, Point c );
+double angle( Point a, Point b, Point c )
+{
+  Vector v = b - a;
+  Vector w = c - a;
+  return std::acos(dot(v,w)/(mag(v)*mag(w)));
+}
 
 bool is_properint( Point a, Point b, Point c, Point d ) {
   if ( is_right(a,b,c) && is_right(a,b,d) ) return false;
