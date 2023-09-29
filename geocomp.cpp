@@ -192,6 +192,11 @@ int area2( Point a, Point b, Point c ) {
   return (v.x*w.y - v.y*w.x);
 }
 
+double area(Point a, Point b, Point c)
+{
+  return 0.5*area2(a,b,c);
+}
+
 bool is_right( Point a, Point b, Point c ) {
   return (area2(a,b,c) < 0);
 }
@@ -560,26 +565,36 @@ bool is_autoint( const Polygon& poly ) {
   return !is_simple(poly);
 }
 
+//Mi función
+//bool is_convex(const Polygon& poly)
+//{
+//  int totalVertex = poly.size();
+//  int vertexA = 0, vertexB = 1, vertexC = 2;
+//  //Poly for at least 3 vertex
+//  if(totalVertex < 3) return false;
+//
+//  for(int i = 3; i <= totalVertex; i+=1)
+//  { 
+//    if(!is_left(poly[vertexA], poly[vertexB], poly[vertexC]))
+//    {
+//      return false;
+//    }
+//    vertexA +=1;
+//    vertexB += 1;
+//    vertexC = i;
+//  }
+//  return true;
+//}
+
+//función del profesor
 bool is_convex(const Polygon& poly)
 {
-  int totalVertex = poly.size();
-  int vertexA = 0, vertexB = 1, vertexC = 2;
-  //Poly for at least 3 vertex
-  if(totalVertex < 3) return false;
-
-  for(int i = 3; i <= totalVertex; i+=1)
-  { 
-    if(!is_left(poly[vertexA], poly[vertexB], poly[vertexC]))
-    {
-      return false;
-    }
-    vertexA +=1;
-    vertexB += 1;
-    vertexC = i;
+  for (unsigned i = 0; i < poly.size(); i += 1)
+  {
+    if(!is_lefton(poly[i], poly[i+1], poly[i+2])) return false;
   }
   return true;
 }
-
 // Determina si el rayo horizontal (-int,c) se intersecta const
 // el segmento a-b
 bool is_rayinter(Point a, Point b, Point c)
@@ -609,4 +624,14 @@ bool is_inside_noconvex(const Polygon& poly, Point pt)
   }
   if(cnt & 1) return true;
   return false;
+}
+
+double area(const Polygon& poly)
+{
+  double sum = 0.0;
+  for(unsigned i =1 ; i < poly.size()-1; i+=1)
+  {
+    sum += area(poly[0], poly[i], poly[i+1]);
   }
+  return sum;
+}

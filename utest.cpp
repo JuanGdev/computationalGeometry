@@ -292,35 +292,36 @@ TEST_CASE("Convex polygon")
 {
   SUBCASE("Is convex")
   {
-    Vertex a(3,5);
-    Vertex b(2,4);
-    Vertex c(2,0);
-    Vertex d(4,0);
-    Vertex e(4,4);
-
       Polygon polyy;
-      polyy.push(a);
-      polyy.push(b);
-      polyy.push(c);
-      polyy.push(d);
-      polyy.push(e);
+      polyy.push(Vertex(1,1));
+      polyy.push(Vertex(4,0));
+      polyy.push(Vertex(7,2));
+      polyy.push(Vertex(6,5));
+      polyy.push(Vertex(3,6));
+      polyy.push(Vertex(1,4));
       CHECK(is_convex(polyy)==true);
     }
     SUBCASE("Not convex")
     {
-      Vertex a(3,5);
-      Vertex b(2,4);
-      Vertex c(2,0);
-      Vertex d(4,0);
-    Vertex e(3,3);
-    Vertex f(4,4);
-    Polygon polyy;
-    polyy.push(a);
-    polyy.push(b);
-    polyy.push(c);
-    polyy.push(d);
-    polyy.push(e);
-    polyy.push(f);
-    CHECK(is_convex(polyy)==false);
+   Polygon polyy;
+      polyy.push(Vertex(1,1));
+      polyy.push(Vertex(4,0));
+      polyy.push(Vertex(7,2));
+      polyy.push(Vertex(4,3));
+      polyy.push(Vertex(3,6));
+      polyy.push(Vertex(1,4));
+   CHECK_FALSE(is_convex(polyy));
+  }
+
+    SUBCASE("Area")
+    {
+   Polygon polyy;
+      polyy.push(Vertex(1,1));
+      polyy.push(Vertex(4,0));
+      polyy.push(Vertex(7,2));
+      polyy.push(Vertex(6,5));
+      polyy.push(Vertex(3,6));
+      polyy.push(Vertex(1,4));
+      CHECK(area(polyy) == doctest::Approx(25.5));
   }
 }

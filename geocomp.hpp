@@ -115,6 +115,8 @@ PointSet generator_genpos(unsigned N, int x0, int x1, int y0, int y1);
 // Área con signo
 int area2( Point a, Point b, Point c );
 
+double area(Point a, Point b, Point c);
+
 // Posición relativa
 bool is_right( Point a, Point b, Point c );
 bool is_left( Point a, Point b, Point c );
@@ -152,5 +154,9 @@ bool is_autoint( const Polygon& poly );
 //Tarea
 bool is_convex(const Polygon& poly);
 bool is_inside_noconvex(const Polygon& poly, Point pt);
+
+
+double area(const Polygon& poly);
+
 #endif
 
