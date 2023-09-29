@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include "lodepng.h"
 #include "geocomp.hpp"
@@ -41,4 +40,5 @@ int main()
 
   unsigned error = lodepng::encode("prueba.png", image, width,height);
   if(error) return 1;
-
+  return 0;
+}
