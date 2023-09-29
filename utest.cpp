@@ -292,6 +292,7 @@ TEST_CASE("Convex polygon")
 {
   SUBCASE("Is convex")
   {
+
       Polygon polyy;
       polyy.push(Vertex(1,1));
       polyy.push(Vertex(4,0));
@@ -303,6 +304,7 @@ TEST_CASE("Convex polygon")
     }
     SUBCASE("Not convex")
     {
+
    Polygon polyy;
       polyy.push(Vertex(1,1));
       polyy.push(Vertex(4,0));
@@ -323,5 +325,6 @@ TEST_CASE("Convex polygon")
       polyy.push(Vertex(3,6));
       polyy.push(Vertex(1,4));
       CHECK(area(polyy) == doctest::Approx(25.5));
+      
   }
 }

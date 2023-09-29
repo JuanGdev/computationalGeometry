@@ -192,6 +192,7 @@ int area2( Point a, Point b, Point c ) {
   return (v.x*w.y - v.y*w.x);
 }
 
+
 double area(Point a, Point b, Point c)
 {
   return 0.5*area2(a,b,c);
@@ -565,6 +566,7 @@ bool is_autoint( const Polygon& poly ) {
   return !is_simple(poly);
 }
 
+
 //Mi función
 //bool is_convex(const Polygon& poly)
 //{
@@ -595,6 +597,27 @@ bool is_convex(const Polygon& poly)
   }
   return true;
 }
+
+bool is_convex(const Polygon& poly)
+{
+  int totalVertex = poly.size();
+  int vertexA = 0, vertexB = 1, vertexC = 2;
+  //Poly for at least 3 vertex
+  if(totalVertex < 3) return false;
+
+  for(int i = 3; i <= totalVertex; i+=1)
+  { 
+    if(!is_left(poly[vertexA], poly[vertexB], poly[vertexC]))
+    {
+      return false;
+    }
+    vertexA +=1;
+    vertexB += 1;
+    vertexC = i;
+  }
+  return true;
+}
+
 // Determina si el rayo horizontal (-int,c) se intersecta const
 // el segmento a-b
 bool is_rayinter(Point a, Point b, Point c)
@@ -624,6 +647,7 @@ bool is_inside_noconvex(const Polygon& poly, Point pt)
   }
   if(cnt & 1) return true;
   return false;
+
 }
 
 double area(const Polygon& poly)
