@@ -347,3 +347,49 @@ TEST_CASE("Convex polygon")
     CHECK(area(polyy) == doctest::Approx(25.5));
   }
 }
+
+TEST_CASE("is ahead function")
+{
+  Vector a(1,1);
+  Vector b(3,-1);
+  Vector d(2,1);
+  CHECK(is_ahead(b,a,d));
+  CHECK_FALSE(is_ahead(a,b,d));
+}
+
+TEST_CASE("extreme vertices lml")
+{
+  Polygon poly;
+  poly.push(Vertex(3,1));
+  poly.push(Vertex(8,2));
+  poly.push(Vertex(9,5));
+  poly.push(Vertex(4,7));
+  poly.push(Vertex(1,4));
+
+
+
+  SUBCASE("extreme indices")
+  {
+    Vector d(7,8);
+    int  imin, imax;
+    extremev(poly,d,imin,imax);
+    CHECK(imin == 0);
+    CHECK(imax == 2);
+  }
+  SUBCASE("extreme vertices")
+  {
+    Vector d(7,8);
+    Vertex  vmin, vmax;
+    extremev(poly,d,vmin,vmax);
+    CHECK(vmin == Vertex(3,1));
+    CHECK(vmax == Vertex(9,5));
+  }
+  SUBCASE("extreme indices (2)")
+  {
+    Vector d(-3,8);
+    int imin, imax;
+    extremev(poly, d, imin, imax);
+    CHECK(imin == 1);
+    CHECK(imax == 3);
+  }
+}

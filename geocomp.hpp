@@ -159,5 +159,13 @@ bool is_inside_noconvex(const Polygon& poly, Point pt);
 
 double area(const Polygon& poly);
 
+//  true si a > b en dirección d 
+//  false si a < b en dirección d
+bool is_ahead(Vector a,Vector b,Vector d);
+
+void extremev(const Polygon& poly, Vector d, Vertex& vmin, Vertex& vmax);
+void extremev(const Polygon& poly, Vector d, int& imin, int& imax);
+
+
 #endif
 

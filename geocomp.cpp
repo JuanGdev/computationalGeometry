@@ -647,3 +647,37 @@ double area(const Polygon& poly)
   }
   return sum;
 }
+
+bool is_ahead(Vector a,Vector b,Vector d)
+{
+  if(dot((a-b),d) > 0 ) return true;
+  return false;
+}
+
+void extremev(const Polygon& poly, Vector d, Vertex& vmin, Vertex& vmax)
+{
+  Vertex tmin = poly[0];
+  Vertex tmax = poly[0];
+  for(unsigned i=1; i < poly.size(); i+=1)
+  {
+    if( is_ahead(poly[i], tmax, d)) tmax = poly[i];
+    if( is_ahead(tmin, poly[i], d)) tmin = poly[i];
+  }
+  vmin = tmin;
+  vmax = tmax;
+}
+
+void extremev(const Polygon& poly, Vector d, int& imin, int& imax)
+{
+  int tmin = 0;
+  int tmax = 0;
+  for(unsigned i = 1; i < poly.size(); i += 1)
+  {
+    if(is_ahead(poly[i], poly[tmax], d)) tmax = i;
+    if(is_ahead(poly[tmin], poly[i], d)) tmin = i;
+  }
+  imin = tmin;
+  imax = tmax;
+}
+
+
