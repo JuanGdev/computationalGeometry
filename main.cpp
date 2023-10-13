@@ -1,44 +1,40 @@
 #include <iostream>
+#include <vector>
 #include "lodepng.h"
 #include "geocomp.hpp"
 
 using namespace std;
 
-int main()
-{
-  Polygon poly;
-  poly.push(Vertex(500,300));
-  poly.push(Vertex(700,100));
-  poly.push(Vertex(300,100));
-  poly.push(Vertex(100,300));
-  poly.push(Vertex(300,500));
-  poly.push(Vertex(700,500));
+int main() {
 
-  unsigned width  = 800;
-  unsigned height = 600;
+   Poly poly;
+   poly.push(Vertex(1,2));
+   poly.push(Vertex(2,1));
+   poly.push(Vertex(3,1));
+   poly.push(Vertex(4,3));
+   poly.push(Vertex(3,3));
+   poly.push(Vertex(2,3));
 
-  vector<unsigned char> image;
+   Line ln(Point(2,1),Point(3,3));
 
-  for(unsigned y=0; y < height; y +=1)
-  {
-    for(unsigned x = 0; x < width; x +=1)
-    {
-      if(is_inside_noconvex(poly, Point(x,y)))
-      {
-        image.push_back(199);
-        image.push_back(163);
-        image.push_back(199);
-        image.push_back(255);
-        continue;
-      }
-      image.push_back(120);
-      image.push_back(89);
-      image.push_back(219);
-      image.push_back(255);
-    }
-  }
+   cout << "poly = " << poly << endl;
 
-  unsigned error = lodepng::encode("prueba.png", image, width,height);
-  if(error) return 1;
-  return 0;
+   PolyCh C1, C2;
+   psplit(poly,1,4,C1,C2);
+   cout << "C1 = " << C1 << endl;
+   cout << "C2 = " << C2 << endl;
+   if ( is_monotone(C1,ln) ) cout << "C1 = monótono" << endl;
+   else cout << "C1 = NO monótono" << endl;
+   if ( is_monotone(C2,ln) ) cout << "C2 = monótono" << endl;
+   else cout << "C2 = NO monótono" << endl;
+
+   if ( is_monotone(poly,ln) ) {
+      cout << "El polígono es monótono" << endl;
+   }
+   else {
+      cout << "El polígono NO es monótono" << endl;
+   }
+
+   return 0;
 }
+

@@ -1,6 +1,7 @@
 #ifndef GEOCOMP_HPP
 #define GEOCOMP_HPP
 
+#include <iostream>
 #include <vector>
 #include <ostream>
 #include <random>
@@ -8,9 +9,16 @@
 #include <cmath>
 #include <algorithm>
 
-//-----------------------------------------------------------------------------
+#define DEG (180.0/M_PI);
+//angle*DEG;
+
+// Nota:
+// Problema con MinGW 64 y wingdi.h, windows.h
+// Colisión de nombre con Polygon
+
+//-----------------------------------------------------------------------
 // Point
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 struct Point {
    Point();
@@ -33,9 +41,9 @@ bool operator==( Point a, Point b );
 bool operator!=( Point a, Point b );
 std::ostream& operator<<( std::ostream& os, Point pt );
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Segment
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 struct Segment {
    Segment();
@@ -48,9 +56,9 @@ struct Segment {
 typedef Segment Line;
 typedef Segment Edge;
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Polygonal chain
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 typedef std::vector<Vertex> PolyCh;
 std::ostream& operator<<( std::ostream& os, const PolyCh& pc );
@@ -58,9 +66,9 @@ std::ostream& operator<<( std::ostream& os, const PolyCh& pc );
 typedef std::vector<Point> PointSet;
 
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Circular array
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 unsigned cindex( unsigned n, int i );
 
@@ -77,16 +85,18 @@ class CircIndex {
       int sn;
 };
 
-//-----------------------------------------------------------------------------
-// Polygon
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
+// Poly
+//-----------------------------------------------------------------------
 
-class Polygon {
+class Poly {
    public:
-      Polygon();
+      Poly();
+      Poly(const PolyCh& pc);
       unsigned size() const;
       void push( Vertex vertex );
 
+      int realind( int index ) const;
       const Vertex& operator[]( int index ) const;
       Vertex& operator[]( int index );
 
@@ -95,16 +105,18 @@ class Polygon {
       std::vector<Vertex> m_vertices;
 };
 
-//-----------------------------------------------------------------------------
+std::ostream& operator<<( std::ostream& os, const Poly& poly );
+
+//-----------------------------------------------------------------------
 // Functions
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 // Operaciones con puntos
 int dot( Vector a, Vector b);
 int distsqr( Point a, Point b );
 int dist( Point a, Point b );
 double fdist( Point a, Point b );
-double mag(Vector v);
+double mag( Vector v );
 
 // Monotonía, cadenas poligonales
 bool is_monotone( PolyCh pc, Line ln );
@@ -115,8 +127,7 @@ PointSet generator_genpos(unsigned N, int x0, int x1, int y0, int y1);
 
 // Área con signo
 int area2( Point a, Point b, Point c );
-
-double area(Point a, Point b, Point c);
+double area( Point a, Point b, Point c );
 
 // Posición relativa
 bool is_right( Point a, Point b, Point c );
@@ -145,26 +156,36 @@ bool is_inter( Point a, Point b, Point c, Point d );
 Point inter_pt( Point a, Point b, Point c, Point d );
 void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y);
 
-// Polygon
-bool is_inside_convex( const Polygon& poly, Point pt );
-bool is_insideon_convex( const Polygon& poly, Point pt );
-bool is_properint( const Polygon& poly, const Segment& seg );
-bool is_simple( const Polygon& poly );
-bool is_autoint( const Polygon& poly );
+// Poly
+bool is_inside_convex( const Poly& poly, Point pt );
+bool is_insideon_convex( const Poly& poly, Point pt );
+bool is_properint( const Poly& poly, const Segment& seg );
+bool is_simple( const Poly& poly );
+bool is_autoint( const Poly& poly );
+bool is_inside_noconvex( const Poly& poly, Point pt );
 
-//Tarea
-bool is_convex(const Polygon& poly);
-bool is_inside_noconvex(const Polygon& poly, Point pt);
+bool is_convex( const Poly& poly );
 
+double area( const Poly& poly);
 
-double area(const Polygon& poly);
+// true:  si a > b en dirección d
+// false: si a < b en dirección d
+bool is_ahead( Vector a, Vector b, Vector d );
 
-//  true si a > b en dirección d 
-//  false si a < b en dirección d
-bool is_ahead(Vector a,Vector b,Vector d);
+void extremev( const Poly& poly, Vector d, Vertex& vmin, Vertex& vmax );
 
-void extremev(const Polygon& poly, Vector d, Vertex& vmin, Vertex& vmax);
-void extremev(const Polygon& poly, Vector d, int& imin, int& imax);
+void extremev( const Poly& poly, Vector d, int& imin, int& imax );
+
+void extremev( const PointSet& pset, Vector d, int& imin, int& imax );
+
+bool psplit( const Poly& poly, int v1, int v2, PolyCh& c1, PolyCh& c2 );
+
+bool is_monotone( const Poly& poly, Line ln );
+
+void tangents( const Poly& poly, Point pt, int& i1, int& i2 );
+
+// Convex hull
+Poly incremental_hull(PointSet pset);
 
 
 #endif

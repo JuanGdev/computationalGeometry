@@ -1,10 +1,9 @@
 #include "geocomp.hpp"
-#include <cmath>
 
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------
 // Point
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------
 
 Point::Point(): x(0), y(0) { }
 
@@ -51,9 +50,9 @@ std::ostream& operator<<( std::ostream& os, Point pt ) {
   return os;
 }
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Segment
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 Segment::Segment() { }
 
@@ -61,9 +60,9 @@ Segment::Segment( Point a, Point b ): a(a.x,a.y), b(b.x,b.y) { }
 
 Segment::Segment( int x0, int y0, int x1, int y1 ): a(x0,y0), b(x1,y1) { }
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Polygonal chain
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 std::ostream& operator<<( std::ostream& os, const PolyCh& pc ) {
   os << pc[0];
@@ -73,9 +72,9 @@ std::ostream& operator<<( std::ostream& os, const PolyCh& pc ) {
   return os;
 }
 
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 // Circular array
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 CircIndex::CircIndex(): n(1), dn(1), sn(-1) { }
 
@@ -109,32 +108,51 @@ unsigned cindex( unsigned n, int i ) {
   return (i + 1) % m + (m - 1);
 }
 
-//-----------------------------------------------------------------------------
-// Polygon
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
+// Poly
+//-----------------------------------------------------------------------
 
-Polygon::Polygon() { }
+Poly::Poly() { }
 
-unsigned Polygon::size() const {
+Poly::Poly(const PolyCh& pc)
+{
+  m_vertices = pc;
+  cind.set(size());
+}
+
+unsigned Poly::size() const {
   return m_vertices.size();
 }
 
-void Polygon::push( Vertex vertex ) {
+void Poly::push( Vertex vertex ) {
   m_vertices.push_back(vertex);
   cind.set( size() );
+  //cind = CircIndex(m_vertices.size());
 }
 
-const Vertex& Polygon::operator[]( int index ) const {
+int Poly::realind( int index ) const {
+  return cind(index);
+}
+
+const Vertex& Poly::operator[]( int index ) const {
   return m_vertices[cind(index)];
 }
 
-Vertex& Polygon::operator[]( int index ) {
+Vertex& Poly::operator[]( int index ) {
   return m_vertices[cind(index)];
 }
 
-//-----------------------------------------------------------------------------
+std::ostream& operator<<( std::ostream& os, const Poly& poly ) {
+  for ( unsigned i=0; i<poly.size(); i+=1 ) {
+    os << poly[i] << "--";
+  }
+  os << "{" << poly[0] << "}";
+  return os;
+}
+
+//-----------------------------------------------------------------------
 // Functions
-//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 
 int dot( Vector a, Vector b) {
   return a.x*b.x + a.y*b.y;
@@ -152,11 +170,9 @@ double fdist( Point a, Point b ) {
   return std::sqrt(distsqr(a,b));
 }
 
-double mag(Vector v)
-{
-  return std::sqrt(v.x*v.x+v.y*v.y);
+double mag( Vector v ) {
+  return std::sqrt(v.x*v.x + v.y*v.y);
 }
-
 
 // Caso 1: ( a < b < c )
 //         ( a > b > c )
@@ -199,8 +215,7 @@ int area2( Point a, Point b, Point c ) {
   return (v.x*w.y - v.y*w.x);
 }
 
-double area(Point a, Point b, Point c)
-{
+double area( Point a, Point b, Point c ) {
   return 0.5*area2(a,b,c);
 }
 
@@ -378,11 +393,10 @@ void ccirc ( Point a, Point b, Point c, double& x, double& y, double& r ) {
 //   return O/D + a;
 //}
 
-double angle( Point a, Point b, Point c )
-{
+double angle( Point a, Point b, Point c ) {
   Vector v = b - a;
   Vector w = c - a;
-  return std::acos(dot(v,w)/(mag(v)*mag(w)));
+  return std::acos( dot(v,w)/(mag(v)*mag(w)) );
 }
 
 bool is_properint( Point a, Point b, Point c, Point d ) {
@@ -523,9 +537,9 @@ void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y ) {
   return;
 }
 
-// Polygon
+// Poly
 
-bool is_inside_convex( const Polygon& poly, Point pt ) {
+bool is_inside_convex( const Poly& poly, Point pt ) {
 
   for ( unsigned i=0; i<poly.size(); i+=1 ) {
     if ( !is_left(poly[i],poly[i+1],pt) ) return false;
@@ -533,7 +547,7 @@ bool is_inside_convex( const Polygon& poly, Point pt ) {
   return true;
 }
 
-bool is_insideon_convex( const Polygon& poly, Point pt ) {
+bool is_insideon_convex( const Poly& poly, Point pt ) {
 
   for ( unsigned i=0; i<poly.size(); i+=1 ) {
     if ( !is_lefton(poly[i],poly[i+1],pt) ) return false;
@@ -541,7 +555,7 @@ bool is_insideon_convex( const Polygon& poly, Point pt ) {
   return true;
 }
 
-bool is_properint( const Polygon& poly, const Segment& seg ) {
+bool is_properint( const Poly& poly, const Segment& seg ) {
   for ( unsigned i=0; i<poly.size(); i+=1 ) {
     if ( is_properint(poly[i],poly[i+1],seg.a,seg.b) ) {
       return true;
@@ -550,7 +564,7 @@ bool is_properint( const Polygon& poly, const Segment& seg ) {
   return false;
 }
 
-int is_propercnt( const Polygon& poly, const Segment& seg ) {
+int is_propercnt( const Poly& poly, const Segment& seg ) {
   int cnt = 0;
 
   for ( unsigned i=0; i<poly.size(); i+=1 ) {
@@ -561,7 +575,7 @@ int is_propercnt( const Polygon& poly, const Segment& seg ) {
   return cnt;
 }
 
-bool is_simple( const Polygon& poly ) {
+bool is_simple( const Poly& poly ) {
 
   for ( unsigned i=0; i<poly.size()-1; i+=1 ) {
     for ( unsigned j=i+1; j<poly.size(); j+=1 ) {
@@ -573,111 +587,213 @@ bool is_simple( const Polygon& poly ) {
   return true;
 }
 
-bool is_autoint( const Polygon& poly ) {
+bool is_autoint( const Poly& poly ) {
   return !is_simple(poly);
 }
 
-//Mi función
-//bool is_convex(const Polygon& poly)
-//{
-//  int totalVertex = poly.size();
-//  int vertexA = 0, vertexB = 1, vertexC = 2;
-//  //Poly for at least 3 vertex
-//  if(totalVertex < 3) return false;
-//
-//  for(int i = 3; i <= totalVertex; i+=1)
-//  { 
-//    if(!is_left(poly[vertexA], poly[vertexB], poly[vertexC]))
-//    {
-//      return false;
-//    }
-//    vertexA +=1;
-//    vertexB += 1;
-//    vertexC = i;
-//  }
-//  return true;
-//}
+// Determina si el rayo horizontal (-inf,c) se intersecta con
+// el segmento a-b
+bool is_rayinter( Point a, Point b, Point c ) {
 
-//función del profesor
-bool is_convex(const Polygon& poly)
-{
-  for (unsigned i = 0; i < poly.size(); i += 1)
-  {
-    if(!is_lefton(poly[i], poly[i+1], poly[i+2])) return false;
+  // Caso 1
+  if ( a.y < c.y && c.y < b.y ) {
+    if ( area2(a,b,c) <= 0 ) return true;
+    return false;
+  }
+
+  //Caso 2
+  if ( b.y < c.y && c.y < a.y ) {
+    if ( area2(a,b,c) >= 0 ) return true;
+    return false;
+  }
+
+  return false;
+}
+
+bool is_inside_noconvex( const Poly& poly, Point pt ) {
+  int cnt = 0; // cuenta de intersecciones
+
+  for ( unsigned i=0; i<poly.size(); i+=1 ) {
+    if ( is_rayinter(poly[i],poly[i+1],pt) ) cnt += 1;
+    if ( poly[i].y == pt.y && poly[i].x <= pt.x ) cnt += 1;
+  }
+
+  //if ( cnt % 2 ) return true;
+  if ( cnt & 1 ) return true;
+  return false;
+}
+
+bool is_convex( const Poly& poly ) {
+  for ( unsigned i=0; i<poly.size(); i+=1 ) {
+    if ( !is_lefton(poly[i],poly[i+1],poly[i+2]) ) {
+      return false;
+    }
   }
   return true;
 }
-// Determina si el rayo horizontal (-int,c) se intersecta const
-// el segmento a-b
-bool is_rayinter(Point a, Point b, Point c)
-{
-  // Caso 1.
-  if(a.y < c.y && c.y < b.y)
-  {
-    if(area2(a,b,c) <= 0) return true;
-    return false;
-  }
-  // Caso 2 
-  if(b.y < c.y && c.y < a.y)
-  {
-    if(area2(a,b,c) >= 0) return true;
-    return false;
-  }
-  return false;
-}
 
-bool is_inside_noconvex(const Polygon& poly, Point pt)
-{
-  int cnt = 0; //cuenta de intersecciones 
-  for(unsigned i = 0; i < poly.size(); i +=1)
-  {
-    if(is_rayinter(poly[i], poly[i+1], pt)) cnt +=1;
-    if(poly[i].y == pt.y && poly[i].x <= pt.x) cnt += 1;
-  }
-  if(cnt & 1) return true;
-  return false;
-}
-
-double area(const Polygon& poly)
-{
+double area( const Poly& poly) {
   double sum = 0.0;
-  for(unsigned i =1 ; i < poly.size()-1; i+=1)
-  {
-    sum += area(poly[0], poly[i], poly[i+1]);
+  for ( unsigned i=1; i<poly.size()-1; i+=1 ) {
+    sum += area(poly[0],poly[i],poly[i+1]);
   }
   return sum;
 }
 
-bool is_ahead(Vector a,Vector b,Vector d)
-{
-  if(dot((a-b),d) > 0 ) return true;
+bool is_ahead( Vector a, Vector b, Vector d ) {
+  if ( dot((a-b),d) > 0 ) return true;
   return false;
 }
 
-void extremev(const Polygon& poly, Vector d, Vertex& vmin, Vertex& vmax)
-{
+void extremev( const Poly& poly, Vector d, Vertex& vmin, Vertex& vmax ) {
   Vertex tmin = poly[0];
   Vertex tmax = poly[0];
-  for(unsigned i=1; i < poly.size(); i+=1)
-  {
-    if( is_ahead(poly[i], tmax, d)) tmax = poly[i];
-    if( is_ahead(tmin, poly[i], d)) tmin = poly[i];
+
+  for ( unsigned i=1; i<poly.size(); i+=1 ) {
+    if ( is_ahead(poly[i],tmax,d) ) tmax = poly[i];
+    if ( is_ahead(tmin,poly[i],d) ) tmin = poly[i];
   }
+
   vmin = tmin;
   vmax = tmax;
 }
 
-void extremev(const Polygon& poly, Vector d, int& imin, int& imax)
+void extremev( const Poly& poly, Vector d, int& imin, int& imax ) {
+  int tmin = 0;
+  int tmax = 0;
+
+  for ( unsigned i=1; i<poly.size(); i+=1 ) {
+    if ( is_ahead(poly[i],poly[tmax],d) ) tmax = i;
+    if ( is_ahead(poly[tmin],poly[i],d) ) tmin = i;
+  }
+
+  imin = tmin;
+  imax = tmax;
+}
+
+bool psplit( const Poly& poly, int v1, int v2, PolyCh& c1, PolyCh& c2 ) {
+  PolyCh C1, C2;
+  int ind1 = poly.realind(v1);
+  int ind2 = poly.realind(v2);
+
+  if ( ind1 == ind2 ) return false;
+
+  int i = ind1;
+  while ( i != ind2 ) {
+    C1.push_back(poly[i]);
+    i = poly.realind(i+1);
+  }
+  C1.push_back(poly[ind2]);
+
+  i = ind2;
+  while ( i != ind1 ) {
+    C2.push_back(poly[i]);
+    i = poly.realind(i+1);
+  }
+  C2.push_back(poly[ind1]);
+
+  c1 = C1;
+  c2 = C2;
+  return true;
+}
+
+bool is_monotone( const Poly& poly, Line ln ) {
+  int i1, i2;
+  PolyCh C1, C2;
+
+  extremev(poly, ln.b-ln.a, i1, i2);
+  psplit(poly,i1,i2,C1,C2);
+  //return is_monotone(C1,ln) && is_monotone(C2,ln);
+
+  if ( !is_monotone(C1,ln) ) return false;
+  if ( !is_monotone(C2,ln) ) return false;
+  return true;
+}
+
+void tangents( const Poly& poly, Point pt, int& i1, int& i2 ) {
+
+  bool s = false;
+  for ( int i=0; i<(int)poly.size(); i+=1 ) {
+    bool a = is_lefton(poly[i-1],poly[i],pt);
+    bool b = is_lefton(poly[i],poly[i+1],pt);
+    if ( (a && !b) || (!a && b) ) {
+      if ( s == false ) {
+        i1 = i;
+        s = true;
+      }
+      else {
+        i2 = i;
+        return;
+      }
+    }
+  }
+}
+
+void extremev( const PointSet& pset, Vector d, int& imin, int& imax )
 {
   int tmin = 0;
   int tmax = 0;
-  for(unsigned i = 1; i < poly.size(); i += 1)
+
+  for(unsigned i = 1; i < pset.size(); i +=1)
   {
-    if(is_ahead(poly[i], poly[tmax], d)) tmax = i;
-    if(is_ahead(poly[tmin], poly[i], d)) tmin = i;
+    if(is_ahead(pset[i], pset[tmax], d)) tmax = i;
+    if(is_ahead(pset[tmin], pset[i], d)) tmin = i;
   }
   imin = tmin;
   imax = tmax;
 }
 
+
+Poly incremental_hull(PointSet pset)
+{
+  //  Obtener la semilla
+  Point x0, x1, y0, y1;
+  Poly hull;
+  if(area2(pset[0], pset[1], pset[2]) > 0)
+  {
+    hull.push(pset[0]);
+    hull.push(pset[1]);
+    hull.push(pset[2]);
+  }
+  else
+{
+    hull.push(pset[0]);
+    hull.push(pset[2]);
+    hull.push(pset[1]);
+  }
+
+  for(unsigned i = 0; i<pset.size(); i+= 1)
+  {
+    // Elegir p
+    if(is_inside_convex(hull,pset[i])) continue;
+    // Calcular tangentes
+    int k1, k2;
+    tangents(hull, pset[i], k1, k2);
+
+    //  Dividir en cadenas C1 y C2
+    PolyCh C1, C2;
+    psplit(hull, k1, k2, C1, C2);
+    // Determinar Cc y Cr
+    C1.push_back(pset[i]);
+    C2.push_back(pset[i]);
+    if(C1.size() == 3)
+    {
+      hull = Poly(C2);
+      continue;
+    }
+    if(C2.size() == 3)
+    {
+      hull = Poly(C1);
+      continue;
+    }
+    hull = Poly(C1);
+    if(is_convex(Poly(C1)))
+    {
+      hull = Poly(C1);
+      continue;
+    }
+    hull = Poly(C2);
+  }
+  return hull;
+}
 
