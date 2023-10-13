@@ -1,13 +1,9 @@
 #ifndef GEOCOMP_HPP
 #define GEOCOMP_HPP
 
+
 #include <iostream>
-#include <vector>
-#include <ostream>
-#include <random>
-#include <chrono>
-#include <cmath>
-#include <algorithm>
+
 
 #define DEG (180.0/M_PI);
 //angle*DEG;
@@ -19,6 +15,7 @@
 //-----------------------------------------------------------------------
 // Point
 //-----------------------------------------------------------------------
+=======
 
 struct Point {
    Point();
@@ -41,6 +38,7 @@ bool operator==( Point a, Point b );
 bool operator!=( Point a, Point b );
 std::ostream& operator<<( std::ostream& os, Point pt );
 
+
 //-----------------------------------------------------------------------
 // Segment
 //-----------------------------------------------------------------------
@@ -56,6 +54,7 @@ struct Segment {
 typedef Segment Line;
 typedef Segment Edge;
 
+
 //-----------------------------------------------------------------------
 // Polygonal chain
 //-----------------------------------------------------------------------
@@ -64,6 +63,7 @@ typedef std::vector<Vertex> PolyCh;
 std::ostream& operator<<( std::ostream& os, const PolyCh& pc );
 
 typedef std::vector<Point> PointSet;
+
 
 
 //-----------------------------------------------------------------------
@@ -85,6 +85,7 @@ class CircIndex {
       int sn;
 };
 
+
 //-----------------------------------------------------------------------
 // Poly
 //-----------------------------------------------------------------------
@@ -105,6 +106,7 @@ class Poly {
       std::vector<Vertex> m_vertices;
 };
 
+
 std::ostream& operator<<( std::ostream& os, const Poly& poly );
 
 //-----------------------------------------------------------------------
@@ -116,7 +118,9 @@ int dot( Vector a, Vector b);
 int distsqr( Point a, Point b );
 int dist( Point a, Point b );
 double fdist( Point a, Point b );
+
 double mag( Vector v );
+
 
 // Monotonía, cadenas poligonales
 bool is_monotone( PolyCh pc, Line ln );
@@ -127,7 +131,9 @@ PointSet generator_genpos(unsigned N, int x0, int x1, int y0, int y1);
 
 // Área con signo
 int area2( Point a, Point b, Point c );
+
 double area( Point a, Point b, Point c );
+
 
 // Posición relativa
 bool is_right( Point a, Point b, Point c );
@@ -155,6 +161,7 @@ bool is_improperint( Point a, Point b, Point c, Point d );
 bool is_inter( Point a, Point b, Point c, Point d );
 Point inter_pt( Point a, Point b, Point c, Point d );
 void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y);
+
 
 // Poly
 bool is_inside_convex( const Poly& poly, Point pt );

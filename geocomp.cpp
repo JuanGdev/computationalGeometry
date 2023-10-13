@@ -3,7 +3,7 @@
 
 //------------------------------------------------------------------------
 // Point
-//------------------------------------------------------------------------
+
 
 Point::Point(): x(0), y(0) { }
 
@@ -50,15 +50,18 @@ std::ostream& operator<<( std::ostream& os, Point pt ) {
   return os;
 }
 
+
 //-----------------------------------------------------------------------
 // Segment
 //-----------------------------------------------------------------------
+
 
 Segment::Segment() { }
 
 Segment::Segment( Point a, Point b ): a(a.x,a.y), b(b.x,b.y) { }
 
 Segment::Segment( int x0, int y0, int x1, int y1 ): a(x0,y0), b(x1,y1) { }
+
 
 //-----------------------------------------------------------------------
 // Polygonal chain
@@ -71,6 +74,7 @@ std::ostream& operator<<( std::ostream& os, const PolyCh& pc ) {
   }
   return os;
 }
+
 
 //-----------------------------------------------------------------------
 // Circular array
@@ -170,6 +174,7 @@ double fdist( Point a, Point b ) {
   return std::sqrt(distsqr(a,b));
 }
 
+
 double mag( Vector v ) {
   return std::sqrt(v.x*v.x + v.y*v.y);
 }
@@ -214,6 +219,7 @@ int area2( Point a, Point b, Point c ) {
   Vector w = c - a;
   return (v.x*w.y - v.y*w.x);
 }
+
 
 double area( Point a, Point b, Point c ) {
   return 0.5*area2(a,b,c);
@@ -393,6 +399,7 @@ void ccirc ( Point a, Point b, Point c, double& x, double& y, double& r ) {
 //   return O/D + a;
 //}
 
+
 double angle( Point a, Point b, Point c ) {
   Vector v = b - a;
   Vector w = c - a;
@@ -537,6 +544,7 @@ void inter_pt( Point a, Point b, Point c, Point d, double& x, double& y ) {
   return;
 }
 
+
 // Poly
 
 bool is_inside_convex( const Poly& poly, Point pt ) {
@@ -547,6 +555,7 @@ bool is_inside_convex( const Poly& poly, Point pt ) {
   return true;
 }
 
+
 bool is_insideon_convex( const Poly& poly, Point pt ) {
 
   for ( unsigned i=0; i<poly.size(); i+=1 ) {
@@ -554,6 +563,7 @@ bool is_insideon_convex( const Poly& poly, Point pt ) {
   }
   return true;
 }
+
 
 bool is_properint( const Poly& poly, const Segment& seg ) {
   for ( unsigned i=0; i<poly.size(); i+=1 ) {
@@ -564,7 +574,9 @@ bool is_properint( const Poly& poly, const Segment& seg ) {
   return false;
 }
 
+
 int is_propercnt( const Poly& poly, const Segment& seg ) {
+
   int cnt = 0;
 
   for ( unsigned i=0; i<poly.size(); i+=1 ) {
@@ -575,7 +587,9 @@ int is_propercnt( const Poly& poly, const Segment& seg ) {
   return cnt;
 }
 
+
 bool is_simple( const Poly& poly ) {
+
 
   for ( unsigned i=0; i<poly.size()-1; i+=1 ) {
     for ( unsigned j=i+1; j<poly.size(); j+=1 ) {
@@ -586,6 +600,7 @@ bool is_simple( const Poly& poly ) {
   }
   return true;
 }
+
 
 bool is_autoint( const Poly& poly ) {
   return !is_simple(poly);
@@ -631,6 +646,7 @@ bool is_convex( const Poly& poly ) {
   }
   return true;
 }
+
 
 double area( const Poly& poly) {
   double sum = 0.0;
