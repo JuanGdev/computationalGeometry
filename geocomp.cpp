@@ -762,7 +762,7 @@ Poly incremental_hull(PointSet pset)
     hull.push(pset[1]);
   }
 
-  for(unsigned i = 0; i<pset.size(); i+= 1)
+  for(unsigned i = 3; i<pset.size(); i+= 1)
   {
     // Elegir p
     if(is_inside_convex(hull,pset[i])) continue;
