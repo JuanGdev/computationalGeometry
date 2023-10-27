@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stack>
 #include <ostream>
 #include <random>
 #include <chrono>
@@ -92,7 +93,7 @@ class CircIndex {
 class Poly {
    public:
       Poly();
-      Poly(const PolyCh& pc);
+      Poly( const PolyCh& pc );
       unsigned size() const;
       void push( Vertex vertex );
 
@@ -173,19 +174,38 @@ double area( const Poly& poly);
 bool is_ahead( Vector a, Vector b, Vector d );
 
 void extremev( const Poly& poly, Vector d, Vertex& vmin, Vertex& vmax );
-
 void extremev( const Poly& poly, Vector d, int& imin, int& imax );
-
 void extremev( const PointSet& pset, Vector d, int& imin, int& imax );
-
 bool psplit( const Poly& poly, int v1, int v2, PolyCh& c1, PolyCh& c2 );
-
 bool is_monotone( const Poly& poly, Line ln );
-
 void tangents( const Poly& poly, Point pt, int& i1, int& i2 );
 
-// Convex hull
-Poly incremental_hull(PointSet pset);
+// Incremental Hull
+Poly incremental_hull( PointSet pset );
+
+// Graham Hull
+int get_p0( PointSet pset );
+
+class AngleCmp {
+   public:
+      AngleCmp( const Point& p0 );
+      bool operator()( const Point& si, const Point& sk );
+   private:
+      Point p0;
+};
+
+void angle_sort( PointSet& pset );
+
+Poly graham_hull( PointSet pset );
+
+//  Quick Hull
+//  Función que recibe una nube de puntos, una dirección y regresa el punto más alejado
+void init_line(const PointSet& pset, Point& a, Point& b);
+void init_sets(const PointSet& pset, Point a, Point b, PointSet& lset, PointSet& rset);
+unsigned most_forward(const PointSet& pset, Vector w);
+PointSet subset(const PointSet& pset, Point a, Point b, Point c);
+Poly qhull(const PointSet& pset);
+PolyCh qhcall(const PointSet& pset, Point a, Point b);
 
 
 #endif

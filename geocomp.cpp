@@ -114,10 +114,9 @@ unsigned cindex( unsigned n, int i ) {
 
 Poly::Poly() { }
 
-Poly::Poly(const PolyCh& pc)
-{
+Poly::Poly( const PolyCh& pc ) {
   m_vertices = pc;
-  cind.set(size());
+  cind.set( size() );
 }
 
 unsigned Poly::size() const {
@@ -671,6 +670,19 @@ void extremev( const Poly& poly, Vector d, int& imin, int& imax ) {
   imax = tmax;
 }
 
+void extremev( const PointSet& pset, Vector d, int& imin, int& imax ) {
+  int tmin = 0;
+  int tmax = 0;
+
+  for ( unsigned i=1; i<pset.size(); i+=1 ) {
+    if ( is_ahead(pset[i],pset[tmax],d) ) tmax = i;
+    if ( is_ahead(pset[tmin],pset[i],d) ) tmin = i;
+  }
+
+  imin = tmin;
+  imax = tmax;
+}
+
 bool psplit( const Poly& poly, int v1, int v2, PolyCh& c1, PolyCh& c2 ) {
   PolyCh C1, C2;
   int ind1 = poly.realind(v1);
@@ -729,71 +741,223 @@ void tangents( const Poly& poly, Point pt, int& i1, int& i2 ) {
   }
 }
 
-void extremev( const PointSet& pset, Vector d, int& imin, int& imax )
-{
-  int tmin = 0;
-  int tmax = 0;
 
-  for(unsigned i = 1; i < pset.size(); i +=1)
-  {
-    if(is_ahead(pset[i], pset[tmax], d)) tmax = i;
-    if(is_ahead(pset[tmin], pset[i], d)) tmin = i;
-  }
-  imin = tmin;
-  imax = tmax;
-}
+Poly incremental_hull( PointSet pset ) {
 
-
-Poly incremental_hull(PointSet pset)
-{
-  //  Obtener la semilla
-  Point x0, x1, y0, y1;
+  // Obtener la semilla
   Poly hull;
-  if(area2(pset[0], pset[1], pset[2]) > 0)
-  {
+  if ( area2(pset[0],pset[1],pset[2]) > 0 ) {
     hull.push(pset[0]);
     hull.push(pset[1]);
     hull.push(pset[2]);
   }
-  else
-{
+  else {
     hull.push(pset[0]);
     hull.push(pset[2]);
     hull.push(pset[1]);
   }
 
-  for(unsigned i = 3; i<pset.size(); i+= 1)
-  {
+  for ( unsigned i=3; i<pset.size(); i+=1 ) {
+
     // Elegir p
-    if(is_inside_convex(hull,pset[i])) continue;
-    // Calcular tangentes
-    int k1, k2;
-    tangents(hull, pset[i], k1, k2);
+    if ( is_inside_convex(hull,pset[i]) ) continue;
 
-    //  Dividir en cadenas C1 y C2
+    // Tangentes
+    int k1, k2;
+    tangents(hull,pset[i],k1,k2);
+
+    // Dividir en cadenas C1 y C2
     PolyCh C1, C2;
-    psplit(hull, k1, k2, C1, C2);
+    psplit(hull,k1,k2,C1,C2);
+
     // Determinar Cc y Cr
     C1.push_back(pset[i]);
     C2.push_back(pset[i]);
-    if(C1.size() == 3)
-    {
-      hull = Poly(C2);
+
+    Poly hull1(C1);
+    Poly hull2(C2);
+
+    bool conv1 = is_convex( hull1 );
+    bool conv2 = is_convex( hull2 );
+
+    // Caso 1
+    if ( conv1 && !conv2 ) {
+      hull = hull1;
       continue;
     }
-    if(C2.size() == 3)
-    {
-      hull = Poly(C1);
+
+    // Caso 2
+    if ( !conv1 && conv2 ) {
+      hull = hull2;
       continue;
     }
-    hull = Poly(C1);
-    if(is_convex(Poly(C1)))
-    {
-      hull = Poly(C1);
-      continue;
+
+    // Caso 3
+    if ( conv1 && conv2 ) {
+      if ( hull1.size() == 3 ) {
+        hull = hull2;
+        continue;
+      }
+      hull = hull1;
     }
-    hull = Poly(C2);
   }
+
   return hull;
 }
+
+// === Graham ===
+
+int get_p0( PointSet pset ) {
+  int k = 0;
+  for ( unsigned i=1; i<pset.size(); i+=1 ) {
+
+    if ( pset[i].y < pset[k].y ) {
+      k = i;
+      continue;
+    }
+
+    if ( pset[i].y != pset[k].y ) continue;
+
+    if ( pset[i].x < pset[k].x ) k = i;
+  }
+
+  return k;
+}
+
+AngleCmp::AngleCmp( const Point& p0 ) : p0(p0) { }
+
+bool AngleCmp::operator()( const Point& si, const Point& sk ) {
+  if ( si == p0 ) return true;
+  if ( sk == p0 ) return false;
+  if ( area2(p0,si,sk) < 0 ) return false;
+  return true;
+}
+
+void angle_sort( PointSet& pset ) {
+  int k = get_p0(pset);
+  AngleCmp acmp(pset[k]);
+
+  sort(pset.begin(),pset.end(),acmp);
+}
+
+Poly graham_hull( PointSet pset ) {
+  PolyCh stack;
+  angle_sort(pset);
+
+  stack.push_back(pset[0]); // p0
+  stack.push_back(pset[1]);
+
+  unsigned i1, i2;
+  for ( unsigned i=2; i<pset.size(); i+=1 ) {
+    i1 = stack.size()-1;
+    i2 = stack.size()-2;
+    while ( is_right( stack[i2],stack[i1],pset[i]) ) {
+      stack.pop_back();
+      i1 -= 1;
+      i2 -= 1;
+    }
+    stack.push_back(pset[i]);
+  }
+
+  return Poly(stack);
+}
+
+unsigned most_forward(const PointSet& pset, Vector w)
+{
+  int mf = 0;
+
+  for(unsigned i = 1; i < pset.size(); i+=1)
+  {
+    if(is_ahead(pset[i], pset[mf],w)) mf = i;
+  }
+  return (unsigned)mf;
+}
+void init_line(const PointSet& pset, Point& a, Point& b)
+{
+  unsigned ta = 0;//bigger
+  unsigned tb = 0;//lower
+  for(unsigned i=1; i < pset.size(); i+=1)
+  {
+    if(pset[i].x < pset[ta].x) ta = i;
+    else if (pset[i].x == pset[ta].x)
+    {
+    if(pset[i].y < pset[ta].y) ta = i;
+  }
+    if(pset[i].x > pset[tb].x) tb = i;
+    else if(pset[i].x == pset[tb].x)
+    {
+    if(pset[i].y > pset[tb].y) tb = i;
+  }
+  }
+  a = pset[ta];
+  b = pset[tb];
+}
+
+
+void init_sets(const PointSet& pset, Point a, Point b, PointSet& lset, PointSet& rset)
+{
+  PointSet right;
+  PointSet left;
+
+  for(unsigned i = 0; i<pset.size(); i+=1)
+  {
+    if(is_left(a, b, pset[i])) {
+      left.push_back(pset[i]);
+      continue;
+    }
+    if(is_right(a, b, pset[i]))
+    {
+      right.push_back(pset[i]);
+      continue;
+    }
+  }
+  lset = left;
+  rset = right;
+}
+
+PointSet subset(const PointSet& pset, Point a, Point b, Point c)
+{
+  PointSet sub;
+  for(unsigned i=0; i<pset.size(); i+=1)
+  {
+    if(is_right(a,b,pset[i]))
+    {
+      sub.push_back(pset[i]);
+      continue;
+    }
+    if(is_right(b,c, pset[i]))
+    {
+      sub.push_back(pset[i]);
+      continue;
+    }
+    if(is_right(c,a,pset[i]))
+    {
+      sub.push_back(pset[i]);
+      continue;
+    }
+  }
+  return sub; 
+}
+
+
+Poly qhull(const PointSet& pset)
+{
+  Point a, b;
+  PointSet lset;
+  PointSet rset;
+  init_line(pset,a,b);
+  init_sets(pset,a,b,lset,rset);
+  PolyCh rp = qhcall(lset,a,b);
+  PolyCh lp = qhcall(rset,b,a);
+
+return Poly(lp + rp);
+
+}
+
+PolyCh qhcall(const PointSet& pset, Point a, Point b)
+{
+
+}
+
+
 
