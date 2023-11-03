@@ -63,6 +63,10 @@ typedef Segment Edge;
 
 typedef std::vector<Vertex> PolyCh;
 std::ostream& operator<<( std::ostream& os, const PolyCh& pc );
+PolyCh operator+(const PolyCh& pc1, const PolyCh& pc2);
+
+PolyCh operator+(const PolyCh& pc, const Point& pt);
+PolyCh operator+( const Point& pt,const PolyCh& pc);
 
 typedef std::vector<Point> PointSet;
 

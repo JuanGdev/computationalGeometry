@@ -72,6 +72,43 @@ std::ostream& operator<<( std::ostream& os, const PolyCh& pc ) {
   return os;
 }
 
+PolyCh operator+(const PolyCh& pc1, const PolyCh& pc2)
+{
+  PolyCh ret;
+  for(unsigned i = 0; i < pc1.size(); i+=1)
+  {
+    ret.push_back(pc1[i]);
+  }
+  for(unsigned i = 0; i < pc2.size(); i+=1)
+  {
+    ret.push_back(pc2[i]);
+  }
+  return ret;
+}
+
+PolyCh operator+(const PolyCh& pc, const Point& pt)
+{
+  PolyCh ret;
+  for(unsigned i = 0; i < pc.size(); i+=1)
+  {
+    ret.push_back(pc[i]);
+  }
+  ret.push_back(pt);
+  return ret;
+}
+
+PolyCh operator+( const Point& pt,const PolyCh& pc)
+{
+  PolyCh ret;
+  ret.push_back(pt);
+
+  for(unsigned i = 0; i < pc.size(); i+=1)
+  {
+    ret.push_back(pc[i]);
+  }
+  return ret;
+}
+
 //-----------------------------------------------------------------------
 // Circular array
 //-----------------------------------------------------------------------
@@ -943,21 +980,41 @@ PointSet subset(const PointSet& pset, Point a, Point b, Point c)
 Poly qhull(const PointSet& pset)
 {
   Point a, b;
-  PointSet lset;
-  PointSet rset;
+  PointSet top;
+  PointSet bot;
   init_line(pset,a,b);
-  init_sets(pset,a,b,lset,rset);
-  PolyCh rp = qhcall(lset,a,b);
-  PolyCh lp = qhcall(rset,b,a);
+  init_sets(pset,a,b,top,bot);
 
-return Poly(lp + rp);
+  PolyCh pc;
+  pc = pc + a;
+  pc = pc + qhcall(top,a,b);
+  pc = pc + b;
+  pc = pc + qhcall(bot, b, a);
 
+  return Poly(pc);
 }
 
 PolyCh qhcall(const PointSet& pset, Point a, Point b)
 {
+  PolyCh ret;
+  if(pset.size()==0) return ret;
+  // Vector v = b - a
+  Vector w = Vector(b.y - a.y, a.x - b.x);  
+  //  Obtener el índice del punto más alejado en dirección w
+  unsigned i = most_forward(pset,w);
+  Point c = pset[i];
 
+
+  //  Creando un subconjunto que esta fuera del triangulo a,b y c
+  if(is_right(a,b,c))
+  {
+    PointSet sub = subset(pset,a,b,c);
+
+    ret = ret + qhcall(sub,b,c);
+    ret = ret + c;
+    ret = ret + qhcall(sub,c,a);
+    return ret;
+  }
+  return ret;
 }
-
-
 
