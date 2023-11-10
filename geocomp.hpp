@@ -211,6 +211,10 @@ PointSet subset(const PointSet& pset, Point a, Point b, Point c);
 Poly qhull(const PointSet& pset);
 PolyCh qhcall(const PointSet& pset, Point a, Point b);
 
+int findSide(const Point& p1, const Point& p2, const Point& p);
+int lineDistance(const Point& p1, const Point& p2, const Point& p);
+void quickHull(std::vector<Point>& points, Point p1, Point p2, int side, std::vector<Point>& hull);
+std::vector<Point> findConvexHull(std::vector<Point>& points);
 
 #endif
 
