@@ -146,6 +146,13 @@ unsigned cindex( unsigned n, int i ) {
 }
 
 //-----------------------------------------------------------------------
+// Triangle
+//-----------------------------------------------------------------------
+Triangle::Triangle(){}
+Triangle::Triangle(Point a, Point b, Point c): a(a), b(b), c(c){}
+
+
+//-----------------------------------------------------------------------
 // Poly
 //-----------------------------------------------------------------------
 
@@ -164,6 +171,13 @@ void Poly::push( Vertex vertex ) {
   m_vertices.push_back(vertex);
   cind.set( size() );
   //cind = CircIndex(m_vertices.size());
+}
+
+
+void Poly::erase(int index)
+{
+  m_vertices.erase(m_vertices.begin()+cind(index));
+  cind.set(size()); // Actualizando el indice del arreglo
 }
 
 int Poly::realind( int index ) const {
@@ -1018,3 +1032,51 @@ PolyCh qhcall(const PointSet& pset, Point a, Point b)
   }
   return ret;
 }*/
+
+//  Triangulazao
+bool is_incone(Point pre, Point cur, Point next, Point a)
+{
+  //  Verificar si el cono es convexo
+  if (is_lefton(pre, cur, next))
+  {
+    return is_left(cur,a,pre) && is_left(a,cur,next);
+  }
+
+  //  else: el cono es cóncavo
+  return !(is_lefton(cur,a,next) && is_lefton(cur,a,pre));
+}
+
+bool is_diagonal(const Poly& poly, int i, int k)
+{
+  if(!( is_incone(poly[i-1], poly[i], poly[i+1], poly[k])))
+  {
+    return false;
+  }
+
+  if(!(is_incone(poly[k-1], poly[k], poly[k+1], poly[i])))
+  {
+    return false;
+  }
+  //  Segment s(poly[i], poly[k]);
+  return is_properint( poly, Segment(poly[i], poly[k]));
+}
+
+TArray ear_clipping(Poly poly)
+{
+  TArray t;
+
+  int i = 0;
+  //  Siempre que tenga mas que un triangulo el poligono, se ejecuta
+  while(poly.size() > 3)
+  {
+    if(is_diagonal(poly,i-1,i+1))
+    {
+      t.push_back(Triangle(poly[i-1], poly[i], poly[i-1]));
+      poly.erase(i);
+      continue;
+    }
+    i+=1;
+  }
+  t.push_back(Triangle(poly[0], poly[1], poly[2]));
+  return t;
+}

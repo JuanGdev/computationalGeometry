@@ -74,6 +74,13 @@ int main (){
     draw.line(hull[i].x, hull[i].y, hull[i+1].x, hull[i+1].y,
               Color::Name::FUCHSIA);
   }
+  TArray tri = ear_clipping((hull));
+  for(unsigned i = 0; i < tri.size(); i+=1)
+  {
+    draw.line(tri[i].a.x, tri[i].a.y, tri[i].b.x, tri[i].b.y, Color::Name::BLUE);
+    draw.line(tri[i].b.x, tri[i].b.y, tri[i].c.x, tri[i].c.y, Color::Name::BLUE);
+    draw.line(tri[i].c.x, tri[i].c.y, tri[i].a.x, tri[i].a.y, Color::Name::BLUE);
+  }
 
   img.write("qhull.png");
 

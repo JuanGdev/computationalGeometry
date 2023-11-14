@@ -70,6 +70,18 @@ PolyCh operator+( const Point& pt,const PolyCh& pc);
 
 typedef std::vector<Point> PointSet;
 
+//-----------------------------------------------------------------------
+//  Triangle
+//-----------------------------------------------------------------------
+struct Triangle{
+  Triangle();
+  Triangle(Point a, Point b, Point c);
+  Point a;
+  Point b;
+  Point c;
+};
+
+typedef std::vector<Triangle> TArray;
 
 //-----------------------------------------------------------------------
 // Circular array
@@ -100,6 +112,7 @@ class Poly {
       Poly( const PolyCh& pc );
       unsigned size() const;
       void push( Vertex vertex );
+        void erase(int index);
 
       int realind( int index ) const;
       const Vertex& operator[]( int index ) const;
@@ -156,6 +169,8 @@ double angle( Point a, Point b, Point c );
 
 // Intersección
 bool is_properint( Point a, Point b, Point c, Point d );
+
+// bool is_properint( Point a, Point b, Point c, Point d );
 bool is_improperint( Point a, Point b, Point c, Point d );
 bool is_inter( Point a, Point b, Point c, Point d );
 Point inter_pt( Point a, Point b, Point c, Point d );
@@ -216,5 +231,9 @@ int lineDistance(const Point& p1, const Point& p2, const Point& p);
 void quickHull(std::vector<Point>& points, Point p1, Point p2, int side, std::vector<Point>& hull);
 std::vector<Point> findConvexHull(std::vector<Point>& points);
 
+//  Ear clipig
+bool is_incone(Point pre, Point cur, Point next, Point a);
+bool is_diagonal(const Poly& poly, int i, int k);
+TArray ear_clipping(Poly poly);
 #endif
 
