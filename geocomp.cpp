@@ -146,6 +146,13 @@ unsigned cindex( unsigned n, int i ) {
 }
 
 //-----------------------------------------------------------------------
+// Triangle
+//-----------------------------------------------------------------------
+Triangle::Triangle(){}
+Triangle::Triangle(Point a, Point b, Point c): a(a), b(b), c(c){}
+
+
+//-----------------------------------------------------------------------
 // Poly
 //-----------------------------------------------------------------------
 
@@ -164,6 +171,13 @@ void Poly::push( Vertex vertex ) {
   m_vertices.push_back(vertex);
   cind.set( size() );
   //cind = CircIndex(m_vertices.size());
+}
+
+
+void Poly::erase(int index)
+{
+  m_vertices.erase(m_vertices.begin()+cind(index));
+  cind.set(size()); // Actualizando el indice del arreglo
 }
 
 int Poly::realind( int index ) const {
@@ -909,6 +923,7 @@ unsigned most_forward(const PointSet& pset, Vector w)
   }
   return (unsigned)mf;
 }
+
 void init_line(const PointSet& pset, Point& a, Point& b)
 {
   unsigned ta = 0;//bigger
@@ -977,7 +992,7 @@ PointSet subset(const PointSet& pset, Point a, Point b, Point c)
 }
 
 
-Poly qhull(const PointSet& pset)
+/*Poly qhull(const PointSet& pset)
 {
   Point a, b;
   PointSet top;
@@ -987,9 +1002,9 @@ Poly qhull(const PointSet& pset)
 
   PolyCh pc;
   pc = pc + a;
-  pc = pc + qhcall(top,a,b);
+  pc = pc + qhcall(bot,a,b);
   pc = pc + b;
-  pc = pc + qhcall(bot, b, a);
+  pc = pc + qhcall(top, b, a);
 
   return Poly(pc);
 }
@@ -999,14 +1014,14 @@ PolyCh qhcall(const PointSet& pset, Point a, Point b)
   PolyCh ret;
   if(pset.size()==0) return ret;
   // Vector v = b - a
-  Vector w = Vector(b.y - a.y, a.x - b.x);  
+  Vector w = Vector(a.y - b.y, b.x - a.x);  
   //  Obtener el índice del punto más alejado en dirección w
   unsigned i = most_forward(pset,w);
   Point c = pset[i];
 
 
   //  Creando un subconjunto que esta fuera del triangulo a,b y c
-  if(is_right(a,b,c))
+  if(is_left(a,b,c))
   {
     PointSet sub = subset(pset,a,b,c);
 
@@ -1016,5 +1031,52 @@ PolyCh qhcall(const PointSet& pset, Point a, Point b)
     return ret;
   }
   return ret;
+}*/
+
+//  Triangulazao
+bool is_incone(Point pre, Point cur, Point next, Point a)
+{
+  //  Verificar si el cono es convexo
+  if (is_lefton(pre, cur, next))
+  {
+    return is_left(cur,a,pre) && is_left(a,cur,next);
+  }
+
+  //  else: el cono es cóncavo
+  return !(is_lefton(cur,a,next) && is_lefton(cur,a,pre));
 }
 
+bool is_diagonal(const Poly& poly, int i, int k)
+{
+  if(!( is_incone(poly[i-1], poly[i], poly[i+1], poly[k])))
+  {
+    return false;
+  }
+
+  if(!(is_incone(poly[k-1], poly[k], poly[k+1], poly[i])))
+  {
+    return false;
+  }
+  //  Segment s(poly[i], poly[k]);
+  return is_properint( poly, Segment(poly[i], poly[k]));
+}
+
+TArray ear_clipping(Poly poly)
+{
+  TArray t;
+
+  int i = 0;
+  //  Siempre que tenga mas que un triangulo el poligono, se ejecuta
+  while(poly.size() > 3)
+  {
+    if(is_diagonal(poly,i-1,i+1))
+    {
+      t.push_back(Triangle(poly[i-1], poly[i], poly[i-1]));
+      poly.erase(i);
+      continue;
+    }
+    i+=1;
+  }
+  t.push_back(Triangle(poly[0], poly[1], poly[2]));
+  return t;
+}
